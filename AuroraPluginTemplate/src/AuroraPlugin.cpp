@@ -35,11 +35,42 @@ extern "C" {
 }
 #endif
 
-int hue = 0;
+#define waitBuildUp -1
+#define endBuildUp -2
+#define buildUpConfirmation 5
+#define MAX_SOURCES 10
 
 FrameSlice_t* frameSlices = NULL;
 int nFrameSlices = 0;
 int transTime = 15;
+int hue = 0;
+
+int buildUp;
+int prev_beatStrength;
+int curr_beatStrength;
+int buildUpCounter;
+
+// Our pointer to the saved pointer panel thing.
+static RGB_t* paletteColours = NULL;
+static LayoutData *layoutData;
+static int nColours = 0;
+
+typedef struct {
+	float x;
+	float y;
+	float diffusion_age; // starts from zero and increments for each frame
+	int R;
+	int G;
+	int B;
+    float intensity;
+    float speed;
+} source_t;
+
+static source_t sources[MAX_SOURCES];
+static int nSources = 0;
+
+void colourSystem(void);
+
 
 /**
  * @description: Initialize the plugin. Called once, when the plugin is loaded.
@@ -49,10 +80,17 @@ int transTime = 15;
  * Any allocation, if done here, should be deallocated in the plugin cleanup function
  *
  */
-void initPlugin(){
-    //do allocation here
+void initPlugin() {
+	// This is a boolean
+	buildUp = 0;
+	buildUpCounter = 0;
+	// This is the last known beatStrength;
+	prev_beatStrength = -1; // Default
 
-    //grab the layout data, this function returns a pointer to a statically allocated buffer. Safe to call as many time as required.
+
+	// We rotate the layout because we want to do the horizontal alignment for the slices.
+
+	//grab the layout data, this function returns a pointer to a statically allocated buffer. Safe to call as many time as required.
     //Dont delete this pointer. The memory is managed automatically.
     LayoutData* layoutData = getLayoutData();
 
@@ -60,7 +98,9 @@ void initPlugin(){
 
     //quantizes the layout into framelices. See SDK documentation for more information
     getFrameSlicesFromLayoutForTriangle(layoutData, &frameSlices, &nFrameSlices, layoutData->globalOrientation);
+
 }
+
 
 /**
  * A helper function thats fills up the frame array at frameIndex with a specified framelices
@@ -80,6 +120,7 @@ void fillUpFramesArray(FrameSlice_t* frameSlice, Frame_t* frame, int* frameIndex
     }
 }
 
+
 /**
  * @description: this the 'main' function that gives a frame to the Aurora to display onto the panels
  * To obtain updated values of enabled features, simply call get<feature_name>, e.g.,
@@ -95,36 +136,93 @@ void fillUpFramesArray(FrameSlice_t* frameSlice, Frame_t* frame, int* frameIndex
  * @param nFrames: fill with the number of frames in frames
  * @param sleepTime: specify interval after which this function is called again, NULL if sound visualization plugin
  */
-void getPluginFrame(Frame_t* frames, int* nFrames, int* sleepTime){
-    int index = 0;
-    int spatialHue = hue;
+void getPluginFrame(Frame_t* frames, int* nFrames, int* sleepTime) {
+	// Call our checker each time
+	colourSystem();
+	int index = 0;
+	int spatialHue = hue;
     int hueStep = 15;
-    if (nFrameSlices % 2 != 0){
-        fillUpFramesArray(&frameSlices[nFrameSlices/2], frames, &index, spatialHue%360);
-        spatialHue += hueStep;
-    }
 
-    for (int i = nFrameSlices/2 - 1; i >= 0; i--){
-        fillUpFramesArray(&frameSlices[i], frames, &index, spatialHue%360);
-        fillUpFramesArray(&frameSlices[nFrameSlices - 1 - i], frames, &index, spatialHue%360);
-        spatialHue += hueStep;
-    }
+	switch(buildUp) {
+		case 0:
+			// This is the normal behaviour.
 
-    hue += 30;
-    if (hue > 360){
-        hue = 0;
-    }
 
-    *nFrames = index;
-    //in a non-music effect, the sleeptime is determined by the plugin itself.
-    //Important that this variable is set correctly by the plugin.
-    *sleepTime = transTime;
+			break;
+		case 1:
+			// This would be the buildUp behaviour.
+
+			//
+			for (int i = nFrameSlices/2 -1; i >= 0 ; i--){
+				fillUpFramesArray(&frameSlices[i], frames, &index, spatialHue%360);
+		        fillUpFramesArray(&frameSlices[nFrameSlices - 1 - i], frames, &index, spatialHue%360);
+			}
+			*nFrames = index;
+			//in a non-music effect, the sleeptime is determined by the plugin itself.
+			//Important that this variable is set correctly by the plugin.
+			*sleepTime = transTime;
+
+
+			break;
+
+	}
 }
+
+
 
 /**
  * @description: called once when the plugin is being closed.
  * Do all deallocation for memory allocated in initplugin here
  */
-void pluginCleanup(){
+void pluginCleanup() {
 	//do deallocation here
+}
+
+
+/**
+	This will be our general algorithm which will decide if there is a beatBuildup
+*/
+void colourSystem() {
+
+	// How strong of a beatStrength will we allow until we decide the buildUp has ended.
+	int drop_offSet;
+	// how many times the tempo got faster
+	buildUpCounter = 0;
+	// Retrieve the current beat data.
+	curr_beatStrength = getTempo();
+
+	// Start off case for the system (everytime a buildUp ends it defaults to this case);
+	if (prev_beatStrength == waitBuildUp) {
+
+		prev_beatStrength = curr_beatStrength;
+
+	} else {
+		// buildUp algorithm has started in the other case.
+
+		// Check if the beat is rising. If it is not we assume buildUp has ended.
+		if (prev_beatStrength > curr_beatStrength) {
+
+			// Check if we have increased tempo buildUpConfirmation number of times
+			// if we do then this indicates we are infact within a build up portion of the song.
+			if (buildUpCounter == buildUpConfirmation) {
+				// we Are indeed within a buildup Section of the code.
+				buildUp = 1;
+				prev_beatStrength = -1;
+			}
+
+			buildUpCounter++;
+			// buildUp has ended disable it.
+		}
+	}
+
+}
+/**
+	Configurations on what happens after the beat has ended.
+	Returns 0 on success.
+*/
+void buildUpEnd() {
+
+
+	// Need to reset things.
+	buildUpCounter = 0;
 }
