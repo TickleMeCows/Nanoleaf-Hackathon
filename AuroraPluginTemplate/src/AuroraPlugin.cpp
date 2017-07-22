@@ -73,3 +73,61 @@ void getPluginFrame(Frame_t* frames, int* nFrames, int* sleepTime){
 void pluginCleanup(){
 	//do deallocation here
 }
+
+
+/**
+	This will be our general algorithm which will
+*/
+int colourSystem(){
+	// This is a boolean
+	int buildUp;
+	// This is the last known beatStrength;
+	int prev_beatStrength = -1; // Default
+	int curr_beatStrength;
+
+	// Retrieve the current beat data.
+	if ((curr_beatStrength = beatData()) == -1){
+		printf("Couldnt recieve the current beat data\n");
+	}
+
+	// Start off case for the system (everytime a buildUp ends it defaults to this case);
+	if (prev_beatStrength == -1){
+		prev_beatStrength = curr_beatStrength;
+	} else {
+		// buildUp algorithm has started in the other case.
+
+		// Check if the beat is rising. If it is not we assume buildUp has ended.
+		if (prev_beatStrength > current_beatStrength) {
+
+		}
+	}
+
+	// How strong of a beatStrength will we allow until we decide the buildUp has ended.
+
+	int drop_offSet;
+
+
+	return 0;
+}
+/**
+	Configurations on what happens after the beat has ended.
+	Returns 0 on success.
+*/
+int buildUpEnd(){
+
+
+}
+
+
+/**
+	This function will be responsible for recieving the beatData.
+
+	Return: Beat Strength.
+	Returns: -1 on error.
+*/
+int beatData(){
+	int beatStrength;
+
+
+	return beatStrength;
+}
