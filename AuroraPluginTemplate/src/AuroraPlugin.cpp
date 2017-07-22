@@ -40,6 +40,10 @@ extern "C" {
 #define buildUpConfirmation 5
 
 
+FrameSlice_t* frameSlices = NULL;
+int nFrameSlices = 0;
+int transTime = 15;
+
 
 int buildUp;
 int prev_beatStrength;
@@ -79,7 +83,6 @@ void initPlugin() {
 	buildUp = 0;
 	// This is the last known beatStrength;
 	prev_beatStrength = -1; // Default
-	curr_beatStrength;
 
 
 	// We rotate the layout because we want to do the horizontal alignment for the slices.
@@ -210,19 +213,6 @@ void buildUpEnd() {
 	buildUpCounter = 0;
 }
 
-
-/**
-	This function will be responsible for recieving the beatData.
-
-	Return: Beat Strength.
-	Returns: -1 on error.
-*/
-int beatData() {
-	int beatStrength;
-
-
-	return beatStrength;
-}
 
 // This is responsible for obtaining all the lights and putting them into a list.
 
