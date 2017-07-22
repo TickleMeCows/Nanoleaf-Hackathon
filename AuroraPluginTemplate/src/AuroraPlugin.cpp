@@ -35,6 +35,19 @@ extern "C" {
 }
 #endif
 
+#define waitBuildUp -1
+#define endBuildUp -2
+#define buildUpConfirmation 5
+
+
+
+int buildUp;
+int prev_beatStrength;
+int curr_beatStrength;
+
+
+
+
 /**
  * @description: Initialize the plugin. Called once, when the plugin is loaded.
  * This function can be used to enable rhythm or advanced features,
@@ -43,7 +56,12 @@ extern "C" {
  * Any allocation, if done here, should be deallocated in the plugin cleanup function
  *
  */
-void initPlugin(){
+void initPlugin() {
+	// This is a boolean
+	buildUp = 0;
+	// This is the last known beatStrength;
+	prev_beatStrength = -1; // Default
+	curr_beatStrength;
 
 }
 
@@ -62,60 +80,81 @@ void initPlugin(){
  * @param nFrames: fill with the number of frames in frames
  * @param sleepTime: specify interval after which this function is called again, NULL if sound visualization plugin
  */
-void getPluginFrame(Frame_t* frames, int* nFrames, int* sleepTime){
+void getPluginFrame(Frame_t* frames, int* nFrames, int* sleepTime) {
+	// Call our checker each time
+	colourSystem();
 
+	switch(buildUp) {
+		case 0:
+			// This is the normal behaviour.
+
+
+			break;
+		case 1:
+			// This would be the buildUp behaviour.
+
+
+
+			break;
+
+	}
 }
 
 /**
  * @description: called once when the plugin is being closed.
  * Do all deallocation for memory allocated in initplugin here
  */
-void pluginCleanup(){
+void pluginCleanup() {
 	//do deallocation here
 }
 
 
 /**
-	This will be our general algorithm which will
+	This will be our general algorithm which will decide if there is a beatBuildup
 */
-int colourSystem(){
-	// This is a boolean
-	int buildUp;
-	// This is the last known beatStrength;
-	int prev_beatStrength = -1; // Default
-	int curr_beatStrength;
+void colourSystem() {
 
+	// How strong of a beatStrength will we allow until we decide the buildUp has ended.
+	int drop_offSet;
+	// how many times the tempo got faster
+	int buildUpCounter = 0;
 	// Retrieve the current beat data.
-	if ((curr_beatStrength = beatData()) == -1){
-		printf("Couldnt recieve the current beat data\n");
-	}
+	curr_beatStrength = getTempo();
 
 	// Start off case for the system (everytime a buildUp ends it defaults to this case);
-	if (prev_beatStrength == -1){
+	if (prev_beatStrength == waitBuildUp) {
+
 		prev_beatStrength = curr_beatStrength;
+
 	} else {
 		// buildUp algorithm has started in the other case.
 
 		// Check if the beat is rising. If it is not we assume buildUp has ended.
-		if (prev_beatStrength > current_beatStrength) {
+		if (prev_beatStrength > curr_beatStrength) {
 
+			// Check if we have increased tempo buildUpConfirmation number of times
+			// if we do then this indicates we are infact within a build up portion of the song.
+			if (buildUpCounter == buildUpConfirmation) {
+				// we Are indeed within a buildup Section of the code.
+				buildUp = 1;
+				prev_beatStrength = -1;
+			}
+
+			buildUpCounter++;
+			// buildUp has ended disable it.
 		}
 	}
 
-	// How strong of a beatStrength will we allow until we decide the buildUp has ended.
-
-	int drop_offSet;
-
-
-	return 0;
 }
 /**
 	Configurations on what happens after the beat has ended.
 	Returns 0 on success.
 */
-int buildUpEnd(){
+void buildUpEnd() {
 
 
+	// Need to reset things.
+	buildUpCounter = 0;
 }
 
 
@@ -125,7 +164,7 @@ int buildUpEnd(){
 	Return: Beat Strength.
 	Returns: -1 on error.
 */
-int beatData(){
+int beatData() {
 	int beatStrength;
 
 
