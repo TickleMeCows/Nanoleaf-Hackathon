@@ -81,7 +81,14 @@ void initPlugin() {
 	prev_beatStrength = -1; // Default
 	curr_beatStrength;
 
+	//grab the layout data, this function returns a pointer to a statically allocated buffer. Safe to call as many time as required.
+    //Dont delete this pointer. The memory is managed automatically.
+    LayoutData* layoutData = getLayoutData();
 
+    rotateAuroraPanels(layoutData, &layoutData->globalOrientation);
+
+    //quantizes the layout into framelices. See SDK documentation for more information
+    getFrameSlicesFromLayoutForTriangle(layoutData, &frameSlices, &nFrameSlices, layoutData->globalOrientation);
 
 }
 
