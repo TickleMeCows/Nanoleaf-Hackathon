@@ -48,6 +48,7 @@ int hue = 0;
 int buildUp;
 int prev_beatStrength;
 int curr_beatStrength;
+int buildUpCounter;
 
 // Our pointer to the saved pointer panel thing.
 static RGB_t* paletteColours = NULL;
@@ -81,6 +82,7 @@ static int nSources = 0;
 void initPlugin() {
 	// This is a boolean
 	buildUp = 0;
+	buildUpCounter = 0;
 	// This is the last known beatStrength;
 	prev_beatStrength = -1; // Default
 
@@ -180,7 +182,7 @@ void colourSystem() {
 	// How strong of a beatStrength will we allow until we decide the buildUp has ended.
 	int drop_offSet;
 	// how many times the tempo got faster
-	int buildUpCounter = 0;
+	buildUpCounter = 0;
 	// Retrieve the current beat data.
 	curr_beatStrength = getTempo();
 
