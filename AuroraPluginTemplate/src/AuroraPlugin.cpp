@@ -100,6 +100,26 @@ void initPlugin() {
 
 }
 
+
+/**
+ * A helper function thats fills up the frame array at frameIndex with a specified framelices
+ * and a specified hue. the color is the specified hue at 100% saturation and brightness.
+ * Note that the FrameSlice_t structure is just a vector of panels at that frame slice
+ */
+void fillUpFramesArray(FrameSlice_t* frameSlice, Frame_t* frame, int* frameIndex, int hue){
+    static RGB_t rgb;
+    for (unsigned int i = 0; i < frameSlice->panelIds.size(); i++){
+        frame[*frameIndex].panelId = frameSlice->panelIds[i];
+        HSVtoRGB((HSV_t){hue, 100, 100}, &rgb);
+        frame[*frameIndex].r = rgb.R;
+        frame[*frameIndex].g = rgb.G;
+        frame[*frameIndex].b = rgb.B;
+        frame[*frameIndex].transTime = transTime;
+        (*frameIndex)++;
+    }
+}
+
+
 /**
  * @description: this the 'main' function that gives a frame to the Aurora to display onto the panels
  * To obtain updated values of enabled features, simply call get<feature_name>, e.g.,
@@ -147,23 +167,7 @@ void getPluginFrame(Frame_t* frames, int* nFrames, int* sleepTime) {
 	}
 }
 
-/**
- * A helper function thats fills up the frame array at frameIndex with a specified framelices
- * and a specified hue. the color is the specified hue at 100% saturation and brightness.
- * Note that the FrameSlice_t structure is just a vector of panels at that frame slice
- */
-void fillUpFramesArray(FrameSlice_t* frameSlice, Frame_t* frame, int* frameIndex, int hue){
-    static RGB_t rgb;
-    for (unsigned int i = 0; i < frameSlice->panelIds.size(); i++){
-        frame[*frameIndex].panelId = frameSlice->panelIds[i];
-        HSVtoRGB((HSV_t){hue, 100, 100}, &rgb);
-        frame[*frameIndex].r = rgb.R;
-        frame[*frameIndex].g = rgb.G;
-        frame[*frameIndex].b = rgb.B;
-        frame[*frameIndex].transTime = transTime;
-        (*frameIndex)++;
-    }
-}
+
 
 /**
  * @description: called once when the plugin is being closed.
