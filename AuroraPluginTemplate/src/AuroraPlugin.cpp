@@ -38,7 +38,7 @@ extern "C" {
 #define waitBuildUp -1
 #define endBuildUp -2
 #define buildUpConfirmation 5
-
+#define MAX_SOURCES 10
 
 FrameSlice_t* frameSlices = NULL;
 int nFrameSlices = 0;
