@@ -43,7 +43,7 @@ extern "C" {
 FrameSlice_t* frameSlices = NULL;
 int nFrameSlices = 0;
 int transTime = 15;
-
+int hue = 0;
 
 int buildUp;
 int prev_beatStrength;
@@ -116,6 +116,9 @@ void initPlugin() {
 void getPluginFrame(Frame_t* frames, int* nFrames, int* sleepTime) {
 	// Call our checker each time
 	colourSystem();
+	int index = 0;
+	int spatialHue = hue;
+    int hueStep = 15;
 
 	switch(buildUp) {
 		case 0:
@@ -131,6 +134,10 @@ void getPluginFrame(Frame_t* frames, int* nFrames, int* sleepTime) {
 				fillUpFramesArray(&frameSlices[i], frames, &index, spatialHue%360);
 		        fillUpFramesArray(&frameSlices[nFrameSlices - 1 - i], frames, &index, spatialHue%360);
 			}
+			*nFrames = index;
+			//in a non-music effect, the sleeptime is determined by the plugin itself.
+			//Important that this variable is set correctly by the plugin.
+			*sleepTime = transTime;
 
 
 			break;
@@ -212,119 +219,3 @@ void buildUpEnd() {
 	// Need to reset things.
 	buildUpCounter = 0;
 }
-
-
-// This is responsible for obtaining all the lights and putting them into a list.
-/*
-/** Removes a light source from the list of light sources *
-void removeSource(int idx)
-{
-	memmove(sources + idx, sources + idx + 1, sizeof(source_t) * (nSources - idx - 1));
-	nSources--;
-}
-
-/** Compute cartesian distance between two points *
-float distance(float x1, float y1, float x2, float y2)
-{
-    float dx = x2 - x1;
-    float dy = y2 - y1;
-    return sqrt(dx * dx + dy * dy);
-}
-
-/**
- * @description: Get a colour by interpolating in a linear way amongs the set of colours in the palette
- * @param colour The colour we want between 0 and nColours - 1. We interpolate in the palette to come up
- *               with a final colour somewhere in the palettes spectrum.
- *
-void getRGB(float colour, int *returnR, int *returnG, int *returnB)
-{
-    float R;
-    float G;
-    float B;
-
-	if(nColours == 0) {
-	    *returnR = 128; // in the case of no palette, use half white as default
-	    *returnG = 128;
-	    *returnB = 128;
-	}
-	else if(nColours == 1) {
-	    *returnR = paletteColours[0].R;
-	    *returnG = paletteColours[0].G;
-	    *returnB = paletteColours[0].B;
-	}
-	else {
-	    int idx = (int)colour;
-	    float fraction = colour - (float)idx;
-
-        if(colour <= 0) {
-            R = paletteColours[0].R;
-            G = paletteColours[0].G;
-            B = paletteColours[0].B;
-        }
-        else if(idx < nColours - 1) {
-            float R1 = paletteColours[idx].R;
-            float G1 = paletteColours[idx].G;
-            float B1 = paletteColours[idx].B;
-            float R2 = paletteColours[idx + 1].R;
-            float G2 = paletteColours[idx + 1].G;
-            float B2 = paletteColours[idx + 1].B;
-            R = (1.0 - fraction) * R1 + fraction * R2;
-            G = (1.0 - fraction) * G1 + fraction * G2;
-            B = (1.0 - fraction) * B1 + fraction * B2;
-        }
-        else {
-            R = paletteColours[nColours - 1].R;
-            G = paletteColours[nColours - 1].G;
-            B = paletteColours[nColours - 1].B;
-        }
-	    *returnR = (int)R;
-	    *returnG = (int)G;
-	    *returnB = (int)B;
-	}
-}
-
-/**
-  * @description: Adds a light source to the list of light sources. The light source will have a particular
-  * colour and intensity and be centred on a randomly chosen panel
-*
-void addSource(float colour, float intensity, float speed)
-{
-    int r = (int)(drand48() * layoutData->nPanels);
-    float x = layoutData->panels[r].shape->getCentroid().x;
-    float y = layoutData->panels[r].shape->getCentroid().y;
-
-    // decide in the colour of this light source and factor in the intensity to arrive at an RGB value
-	int R;
-	int G;
-	int B;
-    getRGB(colour, &R, &G, &B);
-    R *= intensity;
-    G *= intensity;
-    B *= intensity;
-
-    // if we have too many light sources then remove the oldest one
-    if(nSources >= MAX_SOURCES) {
-    	removeSource(0);
-    }
-
-    int i;
-    for(i = nSources; i > 0; i--) {
-        if(intensity >= sources[i - 1].intensity) {
-            break;
-        }
-   }
-
-    memmove(sources + i + 1, sources + i, sizeof(source_t) * (nSources - i));
-
-    // save the information in the list
-    sources[i].x = x;
-    sources[i].y = y;
-    sources[i].diffusion_age = 0.0;
-    sources[i].R = R;
-    sources[i].G = G;
-    sources[i].B = B;
-    sources[i].intensity = intensity;
-    sources[i].speed = speed;
-    nSources++;
-}
-*/
