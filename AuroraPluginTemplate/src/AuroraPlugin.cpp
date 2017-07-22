@@ -215,15 +215,15 @@ void buildUpEnd() {
 
 
 // This is responsible for obtaining all the lights and putting them into a list.
-
-/** Removes a light source from the list of light sources */
+/*
+/** Removes a light source from the list of light sources *
 void removeSource(int idx)
 {
 	memmove(sources + idx, sources + idx + 1, sizeof(source_t) * (nSources - idx - 1));
 	nSources--;
 }
 
-/** Compute cartesian distance between two points */
+/** Compute cartesian distance between two points *
 float distance(float x1, float y1, float x2, float y2)
 {
     float dx = x2 - x1;
@@ -235,7 +235,7 @@ float distance(float x1, float y1, float x2, float y2)
  * @description: Get a colour by interpolating in a linear way amongs the set of colours in the palette
  * @param colour The colour we want between 0 and nColours - 1. We interpolate in the palette to come up
  *               with a final colour somewhere in the palettes spectrum.
- */
+ *
 void getRGB(float colour, int *returnR, int *returnG, int *returnB)
 {
     float R;
@@ -286,7 +286,7 @@ void getRGB(float colour, int *returnR, int *returnG, int *returnB)
 /**
   * @description: Adds a light source to the list of light sources. The light source will have a particular
   * colour and intensity and be centred on a randomly chosen panel
-*/
+*
 void addSource(float colour, float intensity, float speed)
 {
     int r = (int)(drand48() * layoutData->nPanels);
@@ -327,3 +327,4 @@ void addSource(float colour, float intensity, float speed)
     sources[i].speed = speed;
     nSources++;
 }
+*/
