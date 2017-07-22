@@ -69,6 +69,7 @@ typedef struct {
 static source_t sources[MAX_SOURCES];
 static int nSources = 0;
 
+void colourSystem(void);
 
 
 /**
