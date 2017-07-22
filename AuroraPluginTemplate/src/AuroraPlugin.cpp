@@ -81,6 +81,9 @@ void initPlugin() {
 	prev_beatStrength = -1; // Default
 	curr_beatStrength;
 
+
+	// We rotate the layout because we want to do the horizontal alignment for the slices.
+
 	//grab the layout data, this function returns a pointer to a statically allocated buffer. Safe to call as many time as required.
     //Dont delete this pointer. The memory is managed automatically.
     LayoutData* layoutData = getLayoutData();
